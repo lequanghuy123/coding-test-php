@@ -1,17 +1,13 @@
 <?php
 /**
  * Routes configuration.
- *
  * In this file, you set up routes to your controllers and their actions.
  * Routes are very important mechanism that allows you to freely connect
  * different URLs to chosen controllers and their actions (functions).
- *
  * It's loaded within the context of `Application::routes()` method which
  * receives a `RouteBuilder` instance `$routes` as method argument.
- *
  * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
@@ -21,6 +17,7 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use App\Controller\ArticlesController;
 use Cake\Routing\Route\DashedRoute;
 use Cake\Routing\RouteBuilder;
 
@@ -29,7 +26,8 @@ use Cake\Routing\RouteBuilder;
   * So you can use  `$this` to reference the application class instance
   * if required.
  */
-return function (RouteBuilder $routes): void {
+return function (RouteBuilder $routes): void
+{
     /*
      * The default class to use for all routes
      *
@@ -48,53 +46,18 @@ return function (RouteBuilder $routes): void {
      * `{action}` markers.
      */
     $routes->setRouteClass(DashedRoute::class);
+    $routes->setExtensions(['json']);
 
-    $routes->setExtensions(['json', 'xml']);
-
-    $routes->scope('/', function (RouteBuilder $builder): void {
-        /*
-         * Here, we are connecting '/' (base path) to a controller called 'Pages',
-         * its action called 'display', and we pass a param to select the view file
-         * to use (in this case, templates/Pages/home.php)...
-         */
-        $builder->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
-
-        /*
-         * ...and connect the rest of 'Pages' controller's URLs.
-         */
-        $builder->connect('/pages/*', 'Pages::display');
-
+    /**
+     * Api articles controller.
+     */
+    $routes->scope('/', function (RouteBuilder $builder)
+    {
         $builder->resources('Articles');
-
-        /*
-         * Connect catchall routes for all controllers.
-         *
-         * The `fallbacks` method is a shortcut for
-         *
-         * ```
-         * $builder->connect('/{controller}', ['action' => 'index']);
-         * $builder->connect('/{controller}/{action}/*', []);
-         * ```
-         *
-         * You can remove these routes once you've connected the
-         * routes you want in your application.
-         */
+        $builder
+            ->connect('/articles/:article_id/like', ['controller' => 'Articles', 'action' => 'like'])
+            ->setPass(['article_id'])
+            ->setMethods(['POST']);
         $builder->fallbacks();
     });
-
-    /*
-     * If you need a different set of middleware or none at all,
-     * open new scope and define routes there.
-     *
-     * ```
-     * $routes->scope('/api', function (RouteBuilder $builder): void {
-     *     // No $builder->applyMiddleware() here.
-     *
-     *     // Parse specified extensions from URLs
-     *     // $builder->setExtensions(['json', 'xml']);
-     *
-     *     // Connect API actions here.
-     * });
-     * ```
-     */
 };
